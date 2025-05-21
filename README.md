@@ -1,8 +1,10 @@
-# conch-ai
+# Conch-AI
 AI SpringAI Langchain4j Deepseek RAG MCP
 
-## 什么是langchain
-langchain是一套非常适合基于AI大模型开发生成式应用的工具集，为各种大模型提供了一个统一的抽象层
+LangChain4j：https://github.com/langchain4j
+
+## 什么是LangChain
+LangChain是一套非常适合基于AI大模型开发生成式应用的工具集，为各种大模型提供了一个统一的抽象层
 
 ### Models
 Models是LangChain中用于生成文本或执行其他任务的AI模型，通常是预训练的语言模型（如GPT-3、GPT-4等）， 用于生成文本、回答问题、翻译、总结等任务。LangChain允许你通过API调用这些模型，并将它们集成到更复杂的应用中。
@@ -24,3 +26,6 @@ Output Parsers用于将模型的输出解析为结构化数据或特定格式。
 
 ### Tools
 Tools是LangChain中用于执行特定任务的函数或接口。它们可以是内置的工具，也可以是自定义的工具。Tools用于扩展模型的能力，例如调用外部API、执行计算、查询数据库等。通过Tools，模型可以与环境进行交互，执行更复杂的任务。
+
+## LangChain工程结构
+![langchain4j.jpg](assist/langchain4j.jpg)

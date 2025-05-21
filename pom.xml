@@ -10,10 +10,12 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.0.7</revision>
+        <revision>0.0.1</revision>
 
         <spring.boot.version>3.4.5</spring.boot.version>
         <lombok.version>1.18.30</lombok.version>
+
+        <langchain.version>1.0.0-beta5</langchain.version>
 
         <junit.version>5.11.4</junit.version>
         <log4j2.version>2.24.3</log4j2.version>
@@ -75,6 +77,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-community-bom</artifactId>
+                <version>${langchain.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

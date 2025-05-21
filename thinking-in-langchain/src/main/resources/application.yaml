@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: thinking-in-langchain
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        api-key: ${DASHSCOPE_APIKEY}
+        model-name: deepseek-v3
