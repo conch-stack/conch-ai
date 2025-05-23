@@ -12,4 +12,7 @@ langchain4j:
     dashscope:
       chat-model:
         api-key: ${DASHSCOPE_APIKEY}
-        model-name: deepseek-v3
+#        模型列表：https://help.aliyun.com/zh/model-studio/models
+#        model-name: deepseek-v3
+        model-name: qwen-plus
+#        base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
