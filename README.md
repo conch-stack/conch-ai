@@ -9,14 +9,23 @@ LangChain是一套非常适合基于AI大模型开发生成式应用的工具集
 ### Models
 Models是LangChain中用于生成文本或执行其他任务的AI模型，通常是预训练的语言模型（如GPT-3、GPT-4等）， 用于生成文本、回答问题、翻译、总结等任务。LangChain允许你通过API调用这些模型，并将它们集成到更复杂的应用中。
 - ChatModel
+
   这些接受多个ChatMessage作为输入，并返回一个单独的AiMessage作为输出。ChatMessage通常包含文本，但一些LLMs也支持其他模态（例如，图像、音频等）。此类聊天模型的例子包括OpenAI的gpt-4o-mini和Google的gemini-1.5-pro
+
 - EmbeddingModel
+
   这个模型可以将文本转换为Embedding
+
 - ImageModel
+
   这个模型可以生成和编辑图像
+
 - ModerationModel
+
   这个模型可以检查文本是否包含有害内容
+
 - ScoringModel
+
   这个模型可以针对查询的多个文本片段进行评分（或排名），本质上确定每个文本片段与查询的相关性。这对于RAG很有用。这些内容将在以后进行介绍。
 
 ### Prompts
@@ -42,3 +51,57 @@ Tools是LangChain中用于执行特定任务的函数或接口。它们可以是
 
 
 
+## Chat
+- ChatModel
+
+  这些接受多个ChatMessage作为输入，并返回一个单独的AiMessage作为输出。ChatMessage通常包含文本，但一些LLMs也支持其他模态（例如，图像、音频等）。此类聊天模型的例子包括OpenAI的gpt-4o-mini和Google的gemini-1.5-pro
+
+- UserMessage：
+
+  这是一条来自用户的消息。用户可以是您应用程序的最终用户（人类）或者您的应用程序本身。根据LLM支持的模态，用户消息可以包含纯文本（字符串）或其他模态。
+
+- AiMessage：
+  
+  这是一条由AI生成的消息，通常是对用户消息的响应。如您所注意到的，generate方法返回的是一个包含在Response中的AI消息。AI消息可以包含文本响应（字符串）或执行工具的请求（ToolExecutionRequest）。我们将在另一节中探讨工具。
+  
+- ToolExecutionResultMessage：
+
+  这是ToolExecutionRequest的结果。
+
+- SystemMessage：
+
+  这是一条来自系统的消息。通常，您作为开发者应该定义这条消息的内容。
+  通常，您会在这里写下关于LLM在这次对话中的角色、它应该如何表现、应该以何种风格回答等的说明。LLM被训练成比其他类型的消息更关注系统消息，所以请小心，最好不要让最终用户自由定义或注入某些输入到系统消息中。通常，它位于对话的开始。
+
+- CustomMessage：
+
+  这是一种可以包含任意属性的自定义消息。这种消息类型只能由支持它的ChatModel实现使用（目前只有Ollama）
+
+- TokenUsage：
+
+  ChatResponse also contains ChatResponseMetadata. ChatResponseMetadata contains TokenUsage,
+  which contains stats about how many tokens the input (all the ChatMessages that you provided to the generate method) contained,
+  how many tokens were generated as output (in the AiMessage), and the total (input + output)
+
+- FinishReason：
+
+  which is an enum with various reasons why generation has stopped. Usually, it will be FinishReason.STOP, if the LLM decided to stop generation itself.
+
+- Multiple ChatMessages：
+
+  大模型是无状态的，如果需要进行多轮对话，就需要管理对话信息
+
+- ChatMemory:
+
+  手动管理多个messages很繁琐（cumbersome）, 所以利用ChatMemory进行管理
+
+- MultiModality：多模态
+
+  UserMessage 可以包含多种类型的内容：
+
+  TextContent：文本内容
+
+  - ImageContent：  图片可以是链接，也可以是Base64-encoded二进制数据，这取决于你底层的大模型能力
+  - AudioContent：  与ImageContent相似
+  - VideoContent：  与ImageContent相似
+  - PdfFileContent：  与ImageContent相似

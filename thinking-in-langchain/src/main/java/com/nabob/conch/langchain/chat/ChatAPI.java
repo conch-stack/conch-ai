@@ -1,14 +1,31 @@
 package com.nabob.conch.langchain.chat;
 
+import com.nabob.conch.langchain.chat.service.Assistant;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.service.AiServices;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static dev.langchain4j.model.LambdaStreamingResponseHandler.onPartialResponse;
+import static dev.langchain4j.model.LambdaStreamingResponseHandler.onPartialResponseAndError;
+
+import java.util.List;
 
 /**
  * 对话能力
@@ -42,8 +59,13 @@ import org.springframework.web.bind.annotation.RestController;
  * - ChatMemory:
  *      手动管理多个messages很繁琐（cumbersome）, 所以利用ChatMemory进行管理
  *
- * - Multimodality：多模态
- *
+ * - MultiModality：多模态
+ *      UserMessage 可以包含多种类型的内容：
+ *          TextContent
+ *          ImageContent：  图片可以是链接，也可以是Base64-encoded二进制数据，这取决于你底层的大模型能力
+ *          AudioContent：  与ImageContent相似
+ *          VideoContent：  与ImageContent相似
+ *          PdfFileContent：  与ImageContent相似
  *
  * </pre>
  */
@@ -53,6 +75,16 @@ public class ChatAPI {
 
     @Resource
     private ChatModel chatModel;
+
+    @Resource
+    private StreamingChatModel streamingChatModel;
+
+    private Assistant assistant;
+
+    @PostConstruct
+    public void init() {
+        this.assistant = AiServices.create(Assistant.class, chatModel);
+    }
 
     /**
      * Low Level API
@@ -86,11 +118,79 @@ public class ChatAPI {
 //        AiMessage secondAiMessage = chatModel.chat(firstUserMessage, firstAiMessage, secondUserMessage).aiMessage(); // Klaus
 //        return secondAiMessage.text();
 
+        // MultiModality 多模态  ImageContent 图片可以是链接，也可以是Base64-encoded二进制数据，这取决于你底层的大模型能力
+//        UserMessage userMessage = UserMessage.from(
+//                TextContent.from("Describe the following image"),
+//                ImageContent.from("https://example.com/cat.jpg")
+//        );
+//        ChatResponse response = chatModel.chat(userMessage);
+
+//        ChatMemory chatMemory = MessageWindowChatMemory.builder()
+//                .id("12345")
+//                .maxMessages(10)
+//                .chatMemoryStore(new PersistentChatMemoryStore())
+//                .build();
+
+//        String userMessage = "Tell me a joke";
+//        streamingChatModel.chat(userMessage, new StreamingChatResponseHandler() {
+//
+//            @Override
+//            public void onPartialResponse(String partialResponse) {
+//                System.out.println("onPartialResponse: " + partialResponse);
+//            }
+//
+//            @Override
+//            public void onCompleteResponse(ChatResponse completeResponse) {
+//                System.out.println("onCompleteResponse: " + completeResponse);
+//            }
+//
+//            @Override
+//            public void onError(Throwable error) {
+//                error.printStackTrace();
+//            }
+//        });
+//        streamingChatModel.chat("Tell me a joke", onPartialResponse(System.out::print));
+//        streamingChatModel.chat("Tell me a joke", onPartialResponseAndError(System.out::print, Throwable::printStackTrace));
+
         // 用户Message 系统Message
         return chatModel.chat(SystemMessage.from("假如你是特朗普，接下来请以特朗普的语气来对话"), UserMessage.from(message)).aiMessage().text();
+//        return "success";
     }
 
     /**
-     * High Level API   todo
+     * High Level API
      */
+    @GetMapping("/high/chat")
+    public String highChat(@RequestParam(value = "message") String message) {
+        return assistant.chat(message);
+    }
+
+
+    // private
+
+    class PersistentChatMemoryStore implements ChatMemoryStore {
+
+        @Override
+        public List<ChatMessage> getMessages(Object memoryId) {
+            // TODO: Implement getting all messages from the persistent store by memory ID.
+            // ChatMessageDeserializer.messageFromJson(String) and
+            // ChatMessageDeserializer.messagesFromJson(String) helper methods can be used to
+            // easily deserialize chat messages from JSON.
+            return null;
+        }
+
+        @Override
+        public void updateMessages(Object memoryId, List<ChatMessage> messages) {
+            // TODO: Implement updating all messages in the persistent store by memory ID.
+            // ChatMessageSerializer.messageToJson(ChatMessage) and
+            // ChatMessageSerializer.messagesToJson(List<ChatMessage>) helper methods can be used to
+            // easily serialize chat messages into JSON.
+        }
+
+        @Override
+        public void deleteMessages(Object memoryId) {
+            // TODO: Implement deleting all messages in the persistent store by memory ID.
+        }
+    }
+
 }
