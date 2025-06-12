@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-easy-rag</artifactId>
+<!--            <version>1.0.1-beta6</version>-->
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>
         </dependency>
 <!--        私有部署的大模型通过 ollama -->

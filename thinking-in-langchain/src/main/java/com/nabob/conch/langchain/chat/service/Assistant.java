@@ -4,6 +4,8 @@ package com.nabob.conch.langchain.chat.service;
  * AI Service
  * 助手
  *
+ * 使用官方 SpringBoot Starter：https://docs.langchain4j.dev/tutorials/spring-boot-integration/#spring-boot-starter-for-declarative-ai-services
+ *
  * dev.langchain4j.service
  */
 public interface Assistant {

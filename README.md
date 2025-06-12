@@ -46,7 +46,10 @@ Output Parsers用于将模型的输出解析为结构化数据或特定格式。
 ### Tools
 Tools是LangChain中用于执行特定任务的函数或接口。它们可以是内置的工具，也可以是自定义的工具。Tools用于扩展模型的能力，例如调用外部API、执行计算、查询数据库等。通过Tools，模型可以与环境进行交互，执行更复杂的任务。
 
+
+
 ## LangChain工程结构
+
 ![langchain4j.jpg](assist/langchain4j.jpg)
 
 
@@ -105,3 +108,21 @@ Tools是LangChain中用于执行特定任务的函数或接口。它们可以是
   - AudioContent：  与ImageContent相似
   - VideoContent：  与ImageContent相似
   - PdfFileContent：  与ImageContent相似
+
+
+
+## RAG
+
+### Indexing
+
+![img](assets/rag-ingestion-9b548e907df1c3c8948643795a981b95.png)
+
+### Retrieval
+
+![img](assets/rag-retrieval-f525d2937abc08fed5cec36a7f08a4c3.png)
+
+
+
+测试：
+
+![image-20250612202411099](assets/image-20250612202411099.png)

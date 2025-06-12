@@ -1,19 +1,25 @@
 package com.nabob.conch.langchain.chat;
 
 import com.nabob.conch.langchain.chat.service.Assistant;
+import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -81,9 +87,35 @@ public class ChatAPI {
 
     private Assistant assistant;
 
+    private Assistant easyRAGAssistant;
+
     @PostConstruct
     public void init() {
         this.assistant = AiServices.create(Assistant.class, chatModel);
+
+        // test easy RAG
+
+        System.out.println("try to load document");
+        // 1.将各种文档解析为Document对象  DocumentParser -> ApacheTikaDocumentParser   Apache Tika 库支持各种文档类型，用于检测文档类型并对其进行解析
+        List<Document> documents = FileSystemDocumentLoader.loadDocuments("D:\\testdoc");
+        System.out.println("load document success, file size: " + documents.size());
+
+        // 2.定义一个内存向量数据库，用于存储embedding处理后的文档
+        InMemoryEmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+
+        System.out.println("try to split documents and embedding them into embeddingStore");
+        // 3. EmbeddingStoreIngestor 使用 DocumentSplitter 将每个 Document 对象 分割成更小的片段（TextSegment），每个片段由不超过 300 个token组成，并支持 30 个token重叠（保持语义的）
+        // 4. EmbeddingStoreIngestor 加载一个 EmbeddingModel 将每个 TextSegment 转换为 Embedding
+        // NOTE: 我们选择 bge-small-en-v1.5 作为 Easy RAG 的默认嵌入模型。它在 MTEB 排行榜上取得了令人印象深刻的成绩，其量化版本仅占用 24 兆空间。因此，我们可以轻松地将其加载到内存中，并使用 ONNX 插件在同一进程中运行它。
+        // 最终：所有 TextSegment-Embedding Pairs 都存储在 EmbeddingStore 中
+        EmbeddingStoreIngestor.ingest(documents, embeddingStore);
+        System.out.println("split documents and embedding them success");
+
+        easyRAGAssistant = AiServices.builder(Assistant.class)
+                .chatModel(chatModel)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+                .contentRetriever(EmbeddingStoreContentRetriever.from(embeddingStore))
+                .build();
     }
 
     /**
@@ -165,6 +197,13 @@ public class ChatAPI {
         return assistant.chat(message);
     }
 
+    /**
+     * Easy RAG
+     */
+    @GetMapping("/esay/rag")
+    public String easyRAG(@RequestParam(value = "message") String message) {
+        return easyRAGAssistant.chat(message);
+    }
 
     // private
 
