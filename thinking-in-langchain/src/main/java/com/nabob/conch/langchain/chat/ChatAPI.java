@@ -1,13 +1,10 @@
 package com.nabob.conch.langchain.chat;
 
-import com.nabob.conch.langchain.chat.service.Assistant;
+import com.nabob.conch.langchain.service.Assistant;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
-import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.memory.ChatMemory;
@@ -15,7 +12,6 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
@@ -27,9 +23,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import static dev.langchain4j.model.LambdaStreamingResponseHandler.onPartialResponse;
-import static dev.langchain4j.model.LambdaStreamingResponseHandler.onPartialResponseAndError;
 
 import java.util.List;
 
@@ -75,19 +68,18 @@ import java.util.List;
  *
  * </pre>
  */
-@RequestMapping("/api")
+@RequestMapping("/api/chat")
 @RestController
 public class ChatAPI {
 
     @Resource
     private ChatModel chatModel;
 
-    @Resource
-    private StreamingChatModel streamingChatModel;
-
     private Assistant assistant;
 
     private Assistant easyRAGAssistant;
+
+    private final static ChatMemory chatMem = MessageWindowChatMemory.withMaxMessages(20);
 
     @PostConstruct
     public void init() {
@@ -121,7 +113,7 @@ public class ChatAPI {
     /**
      * Low Level API
      */
-    @GetMapping("/low/chat")
+    @GetMapping("/low")
     public String lowChat(@RequestParam(value = "message") String message) {
 //        return chatModel.chat(UserMessage.from(message)).aiMessage().text();
 
@@ -189,10 +181,19 @@ public class ChatAPI {
 //        return "success";
     }
 
+    @GetMapping("/low/chat/memory")
+    public String chatWithLangchain(
+            @RequestParam(value = "message") String message) {
+        chatMem.add(UserMessage.from(message));
+        ChatResponse chat = chatModel.chat(chatMem.messages());
+        chatMem.add(chat.aiMessage());
+        return chat.aiMessage().text();
+    }
+
     /**
      * High Level API
      */
-    @GetMapping("/high/chat")
+    @GetMapping("/high")
     public String highChat(@RequestParam(value = "message") String message) {
         return assistant.chat(message);
     }
@@ -200,7 +201,7 @@ public class ChatAPI {
     /**
      * Easy RAG
      */
-    @GetMapping("/esay/rag")
+    @GetMapping("/easy/rag")
     public String easyRAG(@RequestParam(value = "message") String message) {
         return easyRAGAssistant.chat(message);
     }

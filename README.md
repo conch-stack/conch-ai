@@ -50,7 +50,7 @@ Tools是LangChain中用于执行特定任务的函数或接口。它们可以是
 
 ## LangChain工程结构
 
-![langchain4j.jpg](assist/langchain4j.jpg)
+![langchain4j.jpg](assets/langchain4j.jpg)
 
 
 
@@ -97,6 +97,17 @@ Tools是LangChain中用于执行特定任务的函数或接口。它们可以是
 - ChatMemory:
 
   手动管理多个messages很繁琐（cumbersome）, 所以利用ChatMemory进行管理
+
+  Langchain4j内置了两个chatMemory的实现
+
+  1. MessageWindowChatMemory
+  2. TokenWindowChatMemory
+
+  基于ChatMemoryStore重新实现会话记忆的存储：可自定义实现方式
+
+- 会话隔离
+
+  - 利用MemoryId进行会话隔离
 
 - MultiModality：多模态
 
